@@ -241,7 +241,8 @@ Connection::Connection( const char *desired_ip, const char *desired_port ) /* se
     SRTT( 1000 ),
     RTTVAR( 500 ),
     have_send_exception( false ),
-    send_exception()
+    send_exception(),
+    client_sport( 0 )
 {
   setup();
 
@@ -361,7 +362,8 @@ Connection::Connection( const char *key_str, const char *ip, const char *port ) 
     SRTT( 1000 ),
     RTTVAR( 500 ),
     have_send_exception( false ),
-    send_exception()
+    send_exception(),
+    client_sport( 0 )
 {
   setup();
 
@@ -379,14 +381,20 @@ Connection::Connection( const char *key_str, const char *ip, const char *port ) 
   has_remote_addr = true;
 
   Socket socket = Socket( remote_addr.sa.sa_family );
-  struct sockaddr_in sin = {};
-  sin.sin_family = AF_INET;
-  sin.sin_addr.s_addr = htonl(INADDR_ANY);
-  int sport = 0;
+
+  /* if the env variable MOSH_SPORT is set, always use this as source port and disable port hopping */
   char *env_sport = getenv( "MOSH_SPORT" );
-  if (env_sport != NULL) sport = atoi(env_sport);
-  sin.sin_port = htons(sport);
-  bind(socket.fd(), (struct sockaddr *)&sin, sizeof(sin));
+  if (env_sport != NULL) {
+    client_sport = atoi(env_sport);
+  }
+  /* bind if a source port != 0 is given */
+  if (client_sport != 0) {
+    struct sockaddr_in sin = {};
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
+    sin.sin_port = htons(client_sport);
+    bind(socket.fd(), (struct sockaddr *)&sin, sizeof(sin));
+  }
   socks.push_back(socket);
 }
 
@@ -424,7 +432,8 @@ void Connection::send( string s )
       fprintf( stderr, "Server now detached from client.\n" );
     }
   } else { /* client */
-    if ( ( now - last_port_choice > PORT_HOP_INTERVAL )
+    if ( ( client_sport == 0 )
+     && ( now - last_port_choice > PORT_HOP_INTERVAL )
 	 && ( now - last_roundtrip_success > PORT_HOP_INTERVAL ) ) {
       hop_port();
     }

@@ -167,6 +167,9 @@ namespace Network {
 
     Packet new_packet( string &s_payload );
 
+    /* no port hopping if client source port is != 0 */
+    uint16_t client_sport;
+
     void hop_port( void );
 
     int sock( void ) const { assert( !socks.empty() ); return socks.back().fd(); }

@@ -341,7 +341,7 @@ bool Connection::try_bind( const char *addr, int port_low, int port_high )
   return false;
 }
 
-Connection::Connection( const char *key_str, const char *ip, const char *port ) /* client */
+Connection::Connection( const char *key_str, const char *ip, const char *port, uint16_t sport ) /* client */
   : socks(),
     has_remote_addr( false ),
     remote_addr(),
@@ -363,7 +363,7 @@ Connection::Connection( const char *key_str, const char *ip, const char *port ) 
     RTTVAR( 500 ),
     have_send_exception( false ),
     send_exception(),
-    client_sport( 0 )
+    client_sport( sport )
 {
   setup();
 
@@ -382,11 +382,6 @@ Connection::Connection( const char *key_str, const char *ip, const char *port ) 
 
   Socket socket = Socket( remote_addr.sa.sa_family );
 
-  /* if the env variable MOSH_SPORT is set, always use this as source port and disable port hopping */
-  char *env_sport = getenv( "MOSH_SPORT" );
-  if (env_sport != NULL) {
-    client_sport = atoi(env_sport);
-  }
   /* bind if a source port != 0 is given */
   if (client_sport != 0) {
     struct sockaddr_in sin = {};

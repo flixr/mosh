@@ -145,6 +145,13 @@ int main( int argc, char *argv[] )
     exit( 1 );
   }
 
+  /* if the env variable MOSH_SPORT is set, always use this as source port and disable port hopping */
+  uint16_t sport = 0;
+  char *env_sport = getenv( "MOSH_SPORT" );
+  if (env_sport != NULL) {
+    sport = atoi(env_sport);
+  }
+
   /* Read prediction preference */
   char *predict_mode = getenv( "MOSH_PREDICTION_DISPLAY" );
   /* can be NULL */
@@ -164,7 +171,7 @@ int main( int argc, char *argv[] )
   set_native_locale();
 
   try {
-    STMClient client( ip, desired_port, key, predict_mode );
+    STMClient client( ip, desired_port, key, predict_mode, sport );
     client.init();
 
     try {

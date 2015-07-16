@@ -180,7 +180,7 @@ namespace Network {
 
   public:
     Connection( const char *desired_ip, const char *desired_port ); /* server */
-    Connection( const char *key_str, const char *ip, const char *port ); /* client */
+    Connection( const char *key_str, const char *ip, const char *port, uint16_t sport  ); /* client */
 
     void send( string s );
     string recv( void );

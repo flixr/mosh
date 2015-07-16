@@ -95,7 +95,7 @@ static void serve( int host_fd,
 		   Terminal::Complete &terminal,
 		   ServerConnection &network );
 
-static int run_server( const char *desired_ip, const char *desired_port,
+static int run_server( const char *desired_ip, const char *desired_port, const char *key_str,
 		       const string &command_path, char *command_argv[],
 		       const int colors, bool verbose, bool with_motd );
 
@@ -242,6 +242,15 @@ int main( int argc, char *argv[] )
 
   bool with_motd = false;
 
+  /* Read key from environment */
+  char *env_key = getenv( "MOSH_KEY" );
+  if (env_key == NULL) env_key = "";
+
+  if ( unsetenv( "MOSH_KEY" ) < 0 ) {
+    perror( "unsetenv" );
+    exit( 1 );
+  }
+
   /* Get shell */
   char *my_argv[ 2 ];
   string shell_name;
@@ -319,7 +328,7 @@ int main( int argc, char *argv[] )
   }
 
   try {
-    return run_server( desired_ip, desired_port, command_path, command_argv, colors, verbose, with_motd );
+    return run_server( desired_ip, desired_port, env_key, command_path, command_argv, colors, verbose, with_motd );
   } catch ( const Network::NetworkException &e ) {
     fprintf( stderr, "Network exception: %s\n",
 	     e.what() );
@@ -331,7 +340,7 @@ int main( int argc, char *argv[] )
   }
 }
 
-static int run_server( const char *desired_ip, const char *desired_port,
+static int run_server( const char *desired_ip, const char *desired_port, const char *key_str,
 		       const string &command_path, char *command_argv[],
 		       const int colors, bool verbose, bool with_motd ) {
   /* get initial window size */
@@ -353,7 +362,7 @@ static int run_server( const char *desired_ip, const char *desired_port,
 
   /* open network */
   Network::UserStream blank;
-  ServerConnection *network = new ServerConnection( terminal, blank, desired_ip, desired_port );
+  ServerConnection *network = new ServerConnection( terminal, blank, desired_ip, desired_port, key_str );
 
   if ( verbose ) {
     network->set_verbose();

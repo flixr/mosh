@@ -41,8 +41,8 @@ using namespace std;
 
 template <class MyState, class RemoteState>
 Transport<MyState, RemoteState>::Transport( MyState &initial_state, RemoteState &initial_remote,
-					    const char *desired_ip, const char *desired_port )
-  : connection( desired_ip, desired_port ),
+					    const char *desired_ip, const char *desired_port, const char *key_str )
+  : connection( desired_ip, desired_port, key_str ),
     sender( &connection, initial_state ),
     received_states( 1, TimestampedState<RemoteState>( timestamp(), 0, initial_remote ) ),
     receiver_quench_timer( 0 ),

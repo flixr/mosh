@@ -220,14 +220,14 @@ private:
   AddrInfo &operator=(const AddrInfo &);
 };
 
-Connection::Connection( const char *desired_ip, const char *desired_port ) /* server */
+Connection::Connection( const char *desired_ip, const char *desired_port, const char *key_str ) /* server */
   : socks(),
     has_remote_addr( false ),
     remote_addr(),
     remote_addr_len( 0 ),
     server( true ),
     MTU( DEFAULT_SEND_MTU ),
-    key(),
+    key( key_str ),
     session( key ),
     direction( TO_CLIENT ),
     next_seq( 0 ),

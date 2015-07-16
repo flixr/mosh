@@ -98,24 +98,29 @@ AlignedBuffer::AlignedBuffer( size_t len, const char *data )
 
 Base64Key::Base64Key( string printable_key )
 {
-  if ( printable_key.length() != 22 ) {
-    throw CryptoException( "Key must be 22 letters long." );
+  if ( printable_key.empty() ) {
+    PRNG().fill( key, sizeof( key ) );
   }
+  else {
+    if ( printable_key.length() != 22 ) {
+      throw CryptoException( "Key must be 22 letters long." );
+    }
 
-  string base64 = printable_key + "==";
+    string base64 = printable_key + "==";
 
-  size_t len = 16;
-  if ( !base64_decode( base64.data(), 24, (char *)&key[ 0 ], &len ) ) {
-    throw CryptoException( "Key must be well-formed base64." );
-  }
+    size_t len = 16;
+    if ( !base64_decode( base64.data(), 24, (char *)&key[ 0 ], &len ) ) {
+      throw CryptoException( "Key must be well-formed base64." );
+    }
 
-  if ( len != 16 ) {
-    throw CryptoException( "Key must represent 16 octets." );
-  }
+    if ( len != 16 ) {
+      throw CryptoException( "Key must represent 16 octets." );
+    }
 
-  /* to catch changes after the first 128 bits */
-  if ( printable_key != this->printable_key() ) {
-    throw CryptoException( "Base64 key was not encoded 128-bit key." );
+    /* to catch changes after the first 128 bits */
+    if ( printable_key != this->printable_key() ) {
+      throw CryptoException( "Base64 key was not encoded 128-bit key." );
+    }
   }
 }
 

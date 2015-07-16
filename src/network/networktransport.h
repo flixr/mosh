@@ -67,7 +67,7 @@ namespace Network {
 
   public:
     Transport( MyState &initial_state, RemoteState &initial_remote,
-	       const char *desired_ip, const char *desired_port );
+	       const char *desired_ip, const char *desired_port, const char *key_str = NULL );
     Transport( MyState &initial_state, RemoteState &initial_remote,
 	       const char *key_str, const char *ip, const char *port, uint16_t sport );
 
